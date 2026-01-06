@@ -1,0 +1,21 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: order-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=orderdb
+    ports:
+      - "5433:5432"
+
+  inventory-db:
+    image: postgres:15
+    container_name: inventory-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=inventorydb
+    ports:
+      - "5434:5432"
