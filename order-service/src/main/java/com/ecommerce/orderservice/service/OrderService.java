@@ -1,4 +1,5 @@
 package com.ecommerce.orderservice.service;
+import com.ecommerce.orderservice.client.InventoryClient;
 import com.ecommerce.orderservice.model.Order;
 import com.ecommerce.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +14,11 @@ import java.util.UUID;
 
 public class OrderService {
     private final OrderRepository orderRepository;
-    private  final WebClient webClient;
+    private final InventoryClient inventoryClient;
+
     public void placeOrder(Order orderRequest){
 
-        Boolean isInStock = webClient.get()
-                .uri("http://localhost:8082/api/inventory/" + orderRequest.getSkuCode())
-                .retrieve()
-                .bodyToMono(Boolean.class) // Gelen cevabı Boolean olarak oku
-                .block(); // Cevap gelene kadar bekle (Senkron yapı)
+        boolean isInStock = inventoryClient.isInStock(orderRequest.getSkuCode());
 
         if(Boolean.TRUE.equals(isInStock)){
             Order order = new Order();
