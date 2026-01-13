@@ -1,11 +1,15 @@
 package com.ecommerce.inventoryservice.service;
+import com.ecommerce.inventoryservice.dto.InventoryRequest;
+import com.ecommerce.inventoryservice.model.Inventory;
 import com.ecommerce.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     @Transactional(readOnly = true)
@@ -21,5 +25,25 @@ public class InventoryService {
             System.out.println("HATA: Veritabanında " + skuCode + " bulunamadı!");
             return false;
         }
+
+
+    }
+    @Transactional
+    public void createNewInventory(InventoryRequest inventoryRequest) {
+        // 1. Zaten bu SKU koduna sahip bir kayıt var mı kontrol et (Önemli!)
+        if (inventoryRepository.findBySkuCode(inventoryRequest.getSkuCode()).isPresent()) {
+            log.info("Inventory record for SKU {} already exists. Skipping...", inventoryRequest.getSkuCode());
+            return;
+        }
+
+        // 2. DTO'dan gelen verilerle yeni modelimizi (Entity) kuruyoruz
+        Inventory inventory = new Inventory();
+        inventory.setSkuCode(inventoryRequest.getSkuCode());
+        inventory.setQuantity(inventoryRequest.getQuantity());
+
+        // 3. Veritabanına kaydet
+        inventoryRepository.save(inventory);
+        log.info("New inventory record created for SKU: {} with quantity: {}",
+                inventoryRequest.getSkuCode(), inventoryRequest.getQuantity());
     }
 }

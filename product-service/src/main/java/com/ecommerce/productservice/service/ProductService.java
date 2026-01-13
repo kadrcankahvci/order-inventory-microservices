@@ -2,6 +2,9 @@ package com.ecommerce.productservice.service;
 
 
 
+import com.ecommerce.productservice.client.InventoryClient;
+
+import com.ecommerce.productservice.dto.InventoryRequest;
 import com.ecommerce.productservice.model.Product;
 import com.ecommerce.productservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,27 +17,43 @@ import java.util.List;
 
 
 @RequiredArgsConstructor
+
 @Service
 @Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
+    private final InventoryClient inventoryClient;
 
     public  void createProduct(ProductRequest productRequest) {
         Product product = Product.builder()
+                .skuCode(productRequest.getSkuCode())
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
                 .build();
         productRepository.save(product);
+
+        InventoryRequest inventoryRequest = InventoryRequest.builder()
+                .skuCode(product.getSkuCode())
+                .quantity(productRequest.getQuantity()).build();
+        try {
+            inventoryClient.createInventory(inventoryRequest);
+            log.info("Inventory record created with quantity: {}", productRequest.getQuantity());
+        } catch (Exception e) {
+            log.error("Inventory creation failed for SKU: {}. Error: {}",
+                    product.getSkuCode(), e.getMessage());
+        }
         log.info("Product {} is saved", product.getId());
     }
     private ProductResponse mapToProductResponse(Product product) {
         // Burada ham Product'tan bilgileri alıp, temiz olan Response'a kopyalıyoruz
         return ProductResponse.builder()
                 .id(product.getId())
+                .skuCode(product.getSkuCode())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+
                 .build();
     }
     public List<ProductResponse> getAllProducts() {
