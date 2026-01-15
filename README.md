@@ -1,75 +1,83 @@
-🚀 Spring Boot Microservices: Order & Inventory Ecosystem
-This repository contains a modern microservices-based E-Commerce backend architecture. The system demonstrates a seamless communication between services using Spring WebFlux WebClient.
+🚀 Spring Boot Microservices: Order, Product & Inventory Ecosystem
+This repository features a robust, scalable E-Commerce backend architecture built with Java 17 and Spring Boot 3.x. The system demonstrates advanced microservices patterns, including Service Discovery, API Gateway Routing, and Distributed Transactions.
 
 🏗 System Architecture
-The project currently consists of two core services:
+The ecosystem consists of the following core components:
 
-Order Service (Port: 8081): Manages customer orders and processing.
+API Gateway (Port: 8080): The single entry point for all client requests. It handles dynamic routing to downstream services using Spring Cloud Gateway.
 
-Inventory Service (Port: 8082): Handles stock management and availability checks.
+Service Registry (Netflix Eureka): A centralized directory where all microservices register themselves for seamless discovery.
 
-Workflow:
-When a customer places an order via the Order Service, it performs a synchronous call to the Inventory Service to verify if the requested product is in stock before committing the order to the database.
+Product Service: Manages the product catalog using MongoDB.
+
+Order Service: Orchestrates customer orders and coordinates with the inventory via OpenFeign.
+
+Inventory Service: Maintains stock levels in PostgreSQL and performs transactional stock updates.
+
+🔄 Integrated Workflow
+Centralized Access: Clients communicate only with the API Gateway. The Gateway queries Eureka to find the correct service instance and routes the request.
+
+Product & Stock Sync: Adding a product via the Product Service automatically initializes its stock in the Inventory Service.
+
+Transactional Ordering: When an order is placed:
+
+Order Service verifies stock availability.
+
+If available, the order is saved, and a Transactional deduction is triggered in the Inventory Service to ensure data consistency.
 
 🛠 Technology Stack
-Java 17+
+Core: Java 17, Spring Boot 3.3.x
 
-Spring Boot 3.x
+Routing & Discovery: Spring Cloud Gateway, Netflix Eureka
 
-Spring Data JPA
+Communication: Spring Cloud OpenFeign
 
-Spring WebFlux (Inter-service communication)
+Databases: MongoDB (Products), PostgreSQL (Orders & Inventory)
 
-PostgreSQL (Dockerized individual databases for each service)
+DevOps: Docker & Docker Compose
 
-Docker & Docker Compose (Infrastructure orchestration)
+🧪 API Reference (Via Gateway)
+All requests should now be directed to the Gateway (Port: 8080):
 
-🚀 Getting Started
-1. Prerequisites
-   Make sure you have Docker and JDK 17+ installed on your machine.
-
-2. Infrastructure Setup
-   Navigate to the infrastructure directory and run the following command to start the PostgreSQL databases:
-
-Bash
-
-docker-compose up -d
-3. Running Services
-   You can run each service via your IDE (IntelliJ IDEA) or using Maven in the terminal:
-
-Bash
-
-# Inside inventory-service or order-service folder
-mvn spring-boot:run
-🧪 Testing the API
-Place an Order (POST)
-Endpoint: http://localhost:8081/api/order
-
-Payload:
+1. Create Product
+POST http://localhost:8080/api/product
 
 JSON
 
 {
-"skuCode": "iphone_15",
-"price": 50000,
-"quantity": 1
+  "name": "Gaming Laptop",
+  "description": "RTX 4080, 32GB RAM",
+  "price": 2500,
+  "skuCode": "LAPTOP-G-4080",
+  "quantity": 10
 }
-Check Inventory (GET)
-Endpoint: http://localhost:8082/api/inventory/{sku-code}
+2. Place Order
+POST http://localhost:8080/api/order
 
+JSON
+
+{
+  "skuCode": "LAPTOP-G-4080",
+  "price": 2500,
+  "quantity": 1
+}
 📂 Project Structure
 Plaintext
 
 .
-├── inventory-service/   # Handles stock and availability
-├── order-service/       # Handles customer orders
-├── infrastructure/      # Docker Compose files and DB scripts
-└── pom.xml             # Parent Maven configuration
-🗺 Roadmap & Upcoming Features
-[ ] Service Discovery: Implementing Netflix Eureka.
+├── api-gateway/         # Centralized entry point & routing
+├── discovery-server/    # Service registration (Eureka)
+├── inventory-service/   # Stock management & logic
+├── order-service/       # Order processing & Feign clients
+├── product-service/     # Product catalog management
+└── infrastructure/      # Docker Compose & Database setups
+🗺 Roadmap
+[x] Service Discovery: Netflix Eureka integration.
 
-[ ] API Gateway: Centralized entry point for all requests.
+[x] API Gateway: Centralized routing and entry point.
 
-[ ] Security: Implementing Keycloak/OAuth2.
+[x] Stock Management: Real-time transactional deduction.
 
-[ ] Event-Driven: Asynchronous communication using Apache Kafka.
+[ ] Security: Implementing JWT/OAuth2 via the Gateway.
+
+[ ] Resilience: Circuit Breaker implementation with Resilience4j.
