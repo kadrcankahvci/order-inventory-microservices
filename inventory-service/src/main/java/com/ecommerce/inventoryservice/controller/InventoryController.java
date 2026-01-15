@@ -22,6 +22,11 @@ public class InventoryController {
     public void createInventory(@RequestBody InventoryRequest inventoryRequest) {
         inventoryService.createNewInventory(inventoryRequest);
     }
+    @PutMapping("/reduce")
+    @ResponseStatus(HttpStatus.OK)
+    public  void reduceStock(@RequestParam String skuCode, @RequestParam Integer quantity){
+        inventoryService.reduceStock(skuCode,quantity);
+    }
 }
 
 

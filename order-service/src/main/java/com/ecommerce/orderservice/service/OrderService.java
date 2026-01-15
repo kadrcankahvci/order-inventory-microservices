@@ -4,13 +4,14 @@ import com.ecommerce.orderservice.model.Order;
 import com.ecommerce.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-
+@Transactional
 
 public class OrderService {
     private final OrderRepository orderRepository;
@@ -28,6 +29,7 @@ public class OrderService {
             order.setQuantity(orderRequest.getQuantity());
 
             orderRepository.save(order);
+            inventoryClient.reduceStock(orderRequest.getSkuCode(), orderRequest.getQuantity());
             System.out.println("Sipariş başarıyla oluşturuldu!");
         } else {
             throw new IllegalArgumentException("Üzgünüz, ürün stokta kalmamış!");

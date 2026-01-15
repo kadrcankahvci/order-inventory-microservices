@@ -26,7 +26,6 @@ public class InventoryService {
             return false;
         }
 
-
     }
     @Transactional
     public void createNewInventory(InventoryRequest inventoryRequest) {
@@ -45,5 +44,17 @@ public class InventoryService {
         inventoryRepository.save(inventory);
         log.info("New inventory record created for SKU: {} with quantity: {}",
                 inventoryRequest.getSkuCode(), inventoryRequest.getQuantity());
+    }
+    @Transactional
+    public void reduceStock(String skuCode, Integer quantity) {
+        Inventory inventory = inventoryRepository.findBySkuCode(skuCode)
+                .orElseThrow(() -> new RuntimeException("Product not found in inventory:"+ skuCode));
+        if(inventory.getQuantity()< quantity){
+            throw  new RuntimeException("Not enough stock for SKU:"+ skuCode);
+        } else {
+            inventory.setQuantity(inventory.getQuantity() - quantity);
+            inventoryRepository.save(inventory);
+            log.info("Stock reduced for SKU: {}. New quantity: {}", skuCode, inventory.getQuantity());
+        }
     }
 }
