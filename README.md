@@ -26,7 +26,7 @@ Order Service verifies stock availability.
 If available, the order is saved, and a Transactional deduction is triggered in the Inventory Service to ensure data consistency.
 
 🛠 Technology Stack
-Core: Java 17, Spring Boot 3.3.x
+Core: Java 21, Spring Boot 3.3.x
 
 Routing & Discovery: Spring Cloud Gateway, Netflix Eureka
 
